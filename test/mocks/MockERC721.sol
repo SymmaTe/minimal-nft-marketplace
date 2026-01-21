@@ -8,7 +8,7 @@ contract MockERC721 is ERC721 {
     uint256 private s_tokenIds;
 
     constructor() ERC721("MockERC721", "MCK") {
-       s_tokenIds = 0;
+        s_tokenIds = 0;
     }
 
     function mint(address to) public {

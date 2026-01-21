@@ -56,7 +56,7 @@ contract IntegrationNftMarketplaceTest is Test {
         nftMarketplace.listItem(address(mockERC721), TOKEN_ID, LISTING_PRICE);
 
         // Buyer purchases the item
-        uint256 fee = LISTING_PRICE /20; // 5% fee
+        uint256 fee = LISTING_PRICE / 20; // 5% fee
         uint256 sellerAmount = LISTING_PRICE - fee;
         uint256 ownerInitialBalance = nftMarketplace.i_owner().balance;
         vm.prank(buyer);

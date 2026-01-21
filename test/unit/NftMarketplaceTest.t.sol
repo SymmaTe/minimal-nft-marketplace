@@ -54,37 +54,25 @@ contract NftMarketplaceTest is Test {
     function testListingItemRevertsIfPriceZero() public getApproval {
         // Test listing an item reverts if the price is zero
         vm.prank(seller);
-        vm.expectRevert(
-            NftMarketplace.NftMarketplace__PriceMustBeAboveZero.selector
-        );
+        vm.expectRevert(NftMarketplace.NftMarketplace__PriceMustBeAboveZero.selector);
         nftMarketplace.listItem(address(mockERC721), TOKEN_ID, 0);
     }
 
     function testListingItemRevertsIfDontGetApproval() public {
         // Test listing an item reverts if the marketplace is not approved
         vm.prank(seller);
-        vm.expectRevert(
-            NftMarketplace.NftMarketplace__NotApprovedForMarketplace.selector
-        );
+        vm.expectRevert(NftMarketplace.NftMarketplace__NotApprovedForMarketplace.selector);
         nftMarketplace.listItem(address(mockERC721), TOKEN_ID, LISTING_PRICE);
     }
 
     function testListingItemAndEvents() public getApproval {
         // Test successful listing of an item
         vm.expectEmit(true, true, false, true);
-        emit NftMarketplace.ItemListed(
-            address(mockERC721),
-            TOKEN_ID,
-            LISTING_PRICE,
-            seller
-        );
+        emit NftMarketplace.ItemListed(address(mockERC721), TOKEN_ID, LISTING_PRICE, seller);
         vm.prank(seller);
         nftMarketplace.listItem(address(mockERC721), TOKEN_ID, LISTING_PRICE);
         //assert listing
-        NftMarketplace.Listing memory listing = nftMarketplace.getListing(
-            address(mockERC721),
-            TOKEN_ID
-        );
+        NftMarketplace.Listing memory listing = nftMarketplace.getListing(address(mockERC721), TOKEN_ID);
         assert(listing.price == LISTING_PRICE);
         assert(listing.seller == seller);
     }
@@ -97,17 +85,11 @@ contract NftMarketplaceTest is Test {
         nftMarketplace.buyItem(address(mockERC721), TOKEN_ID + 1);
     }
 
-    function testBuyingItemRevertsIncorrectPrice()
-        public
-        listedItem
-    {
+    function testBuyingItemRevertsIncorrectPrice() public listedItem {
         // Test buying an item reverts if the sent value is incorrect
         vm.prank(buyer);
         vm.expectRevert(NftMarketplace.NftMarketplace__IncorrectPrice.selector);
-        nftMarketplace.buyItem{value: LISTING_PRICE - 0.1 ether}(
-            address(mockERC721),
-            TOKEN_ID
-        );
+        nftMarketplace.buyItem{value: LISTING_PRICE - 0.1 ether}(address(mockERC721), TOKEN_ID);
     }
 
     function testBuyingItemAndEvents() public listedItem {
@@ -117,19 +99,10 @@ contract NftMarketplaceTest is Test {
         uint256 ownerInitialBalance = nftMarketplace.i_owner().balance;
 
         vm.expectEmit(true, true, false, true);
-        emit NftMarketplace.ItemBought(
-            address(mockERC721),
-            TOKEN_ID,
-            LISTING_PRICE,
-            fee,
-            buyer
-        );
+        emit NftMarketplace.ItemBought(address(mockERC721), TOKEN_ID, LISTING_PRICE, fee, buyer);
 
         vm.prank(buyer);
-        nftMarketplace.buyItem{value: LISTING_PRICE}(
-            address(mockERC721),
-            TOKEN_ID
-        );
+        nftMarketplace.buyItem{value: LISTING_PRICE}(address(mockERC721), TOKEN_ID);
 
         // Assert new owner
         assert(mockERC721.ownerOf(TOKEN_ID) == buyer);
@@ -157,20 +130,13 @@ contract NftMarketplaceTest is Test {
     function testCancelingListingAndEvents() public listedItem {
         // Test successful canceling of a listing
         vm.expectEmit(true, true, false, true);
-        emit NftMarketplace.ItemCanceled(
-            address(mockERC721),
-            TOKEN_ID,
-            seller
-        );
+        emit NftMarketplace.ItemCanceled(address(mockERC721), TOKEN_ID, seller);
 
         vm.prank(seller);
         nftMarketplace.cancelListing(address(mockERC721), TOKEN_ID);
 
         // Assert listing is removed
-        NftMarketplace.Listing memory listing = nftMarketplace.getListing(
-            address(mockERC721),
-            TOKEN_ID
-        );
+        NftMarketplace.Listing memory listing = nftMarketplace.getListing(address(mockERC721), TOKEN_ID);
         assert(listing.price == 0);
         assert(listing.seller == address(0));
     }
